@@ -7,6 +7,7 @@ module Hubspot
   # {http://developers.hubspot.com/docs/methods/engagements/create_engagement}
   #
   class Engagement
+    ALL_PATH = '/engagements/v1/engagements/paged'
     CREATE_ENGAGMEMENT_PATH = '/engagements/v1/engagements'
     ENGAGEMENT_PATH = '/engagements/v1/engagements/:engagement_id'
     ASSOCIATE_ENGAGEMENT_PATH = '/engagements/v1/engagements/:engagement_id/associations/:object_type/:object_vid'
@@ -28,6 +29,18 @@ module Hubspot
     end
 
     class << self
+      def all(opts = {})
+        Hubspot::PagedCollection.new(opts) do |options, offset, limit|
+          response = Hubspot::Connection.get_json(
+            ALL_PATH,
+            options.merge("limit" => limit, "offset" => offset)
+          )
+
+          engagements = response["engagements"].map { |result| new(HashWithIndifferentAccess.new(result)) }
+          [engagements, response["offset"], response["hasMore"]]
+        end
+      end
+
       def create!(params={})
         response = Hubspot::Connection.post_json(CREATE_ENGAGMEMENT_PATH, params: {}, body: params )
         new(HashWithIndifferentAccess.new(response))
