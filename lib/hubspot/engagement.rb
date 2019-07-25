@@ -36,7 +36,7 @@ module Hubspot
             options.merge("limit" => limit, "offset" => offset)
           )
 
-          engagements = response["engagements"].map do |result|
+          engagements = response["results"].map do |result|
             new(HashWithIndifferentAccess.new(result))
           end
           [engagements, response["offset"], response["hasMore"]]
